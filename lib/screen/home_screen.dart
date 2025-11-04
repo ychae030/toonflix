@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:toonflix/model/webtoon_model.dart';
 import 'package:toonflix/services/api_service.dart';
+import 'package:toonflix/widgets/webtoon_widget.dart';
 
 class HomeScreen extends StatelessWidget {
   HomeScreen({super.key});
@@ -28,24 +29,11 @@ class HomeScreen extends StatelessWidget {
         future: webtoons,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            return ScrollConfiguration(
-              behavior: ScrollConfiguration.of(context).copyWith(
-                dragDevices: {
-                  PointerDeviceKind.mouse,
-                  PointerDeviceKind.touch,
-                  PointerDeviceKind.trackpad,
-                },
-              ),
-              child: ListView.separated(
-                // 사용자가 보지 않는 리스트는 build 하지 않음
-                scrollDirection: Axis.horizontal,
-                itemCount: snapshot.data!.length,
-                itemBuilder: (context, index) {
-                  var webtoon = snapshot.data![index];
-                  return Text(webtoon.title);
-                },
-                separatorBuilder: (context, index) => const SizedBox(width: 20),
-              ),
+            return Column(
+              children: [
+                const SizedBox(height: 50),
+                Expanded(child: _buildWebtoonList(context, snapshot.data!)),
+              ],
             );
           }
           return const Center(child: CircularProgressIndicator());
@@ -53,4 +41,30 @@ class HomeScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+Widget _buildWebtoonList(BuildContext context, List<WebtoonModel> items) {
+  return ScrollConfiguration(
+    behavior: ScrollConfiguration.of(context).copyWith(
+      dragDevices: {
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.touch,
+        PointerDeviceKind.trackpad,
+      },
+    ),
+    child: ListView.separated(
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+      scrollDirection: Axis.horizontal,
+      itemCount: items.length,
+      itemBuilder: (context, index) {
+        final webtoon = items[index];
+        return Webtoon(
+          title: webtoon.title,
+          thumb: webtoon.thumb,
+          id: webtoon.id,
+        );
+      },
+      separatorBuilder: (context, index) => const SizedBox(width: 40),
+    ),
+  );
 }
